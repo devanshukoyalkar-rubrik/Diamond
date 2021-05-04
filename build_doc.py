@@ -56,8 +56,8 @@ def getCollectors(path):
                     if cls.__name__ not in collectors:
                         collectors[cls.__name__] = module
             except Exception:
-                print "Failed to import module: %s. %s" % (
-                    modname, traceback.format_exc())
+                print("Failed to import module: %s. %s" % (
+                    modname, traceback.format_exc()))
                 collectors[modname] = False
 
         elif os.path.isdir(cPath):
@@ -91,8 +91,8 @@ def getHandlers(path, name=None):
                     if cls.__name__ not in handlers:
                         handlers[cls.__name__] = module
             except Exception:
-                print "Failed to import module: %s. %s" % (
-                    modname, traceback.format_exc())
+                print("Failed to import module: %s. %s" % (
+                    modname, traceback.format_exc()))
                 handlers[modname] = False
 
         elif os.path.isdir(cPath):
@@ -110,7 +110,7 @@ def writeDocString(docFile, name, doc):
     docFile.write("%s\n" % (name))
     docFile.write("=====\n")
     if doc is None:
-        print "No __doc__ string for %s!" % name
+        print("No __doc__ string for %s!" % name)
     docFile.write("%s\n" % doc)
 
 
@@ -142,7 +142,7 @@ def writeDocOptions(docFile, options, default_options):
 
 
 def writeDoc(items, type_name, doc_path):
-    for item in sorted(items.iterkeys()):
+    for item in sorted(items.keys()):
 
         # Skip configuring the basic item object
         if item == type_name:
@@ -150,7 +150,7 @@ def writeDoc(items, type_name, doc_path):
         if item.startswith('Test'):
             continue
 
-        print "Processing %s..." % (item)
+        print("Processing %s..." % (item))
 
         if not hasattr(items[item], item):
             continue
@@ -172,8 +172,8 @@ def writeDoc(items, type_name, doc_path):
             default_options = obj.get_default_config()
             if type_name is "Handler":
                 os.remove(tmpfile[1])
-        except Exception, e:
-            print "Caught Exception %s" % e
+        except Exception as e:
+            print("Caught Exception %s" % e)
 
         docFile = open(os.path.join(doc_path, item + ".md"), 'w')
 
@@ -228,10 +228,10 @@ if __name__ == "__main__":
     if os.path.exists(options.configfile):
         config = configobj.ConfigObj(os.path.abspath(options.configfile))
     else:
-        print >> sys.stderr, "ERROR: Config file: %s does not exist." % (
-            options.configfile)
-        print >> sys.stderr, ("Please run python config.py -c " +
-                              "/path/to/diamond.conf")
+        print("ERROR: Config file: %s does not exist." % (
+            options.configfile), file=sys.stderr)
+        print(("Please run python config.py -c " +
+                              "/path/to/diamond.conf"), file=sys.stderr)
         parser.print_help(sys.stderr)
         sys.exit(1)
 

@@ -17,7 +17,7 @@ This collector is based upon the HTTPJSONCollector.
 
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 import diamond.collector
 
@@ -59,12 +59,12 @@ class EventstoreProjectionsCollector(diamond.collector.Collector):
 
     def _json_to_flat_metrics(self, prefix, data):
 
-        for key, value in data.items():
+        for key, value in list(data.items()):
             if isinstance(value, dict):
                 for k, v in self._json_to_flat_metrics(
                         "%s.%s" % (prefix, key), value):
                     yield k, v
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 if value == "Running":
                     value = 1
                     yield ("%s.%s" % (prefix, key), value)
@@ -91,12 +91,12 @@ class EventstoreProjectionsCollector(diamond.collector.Collector):
             self.config['route']
         )
 
-        req = urllib2.Request(eventstore_host, headers=self.config['headers'])
+        req = urllib.request.Request(eventstore_host, headers=self.config['headers'])
         req.add_header('Content-type', 'application/json')
 
         try:
-            resp = urllib2.urlopen(req)
-        except urllib2.URLError as e:
+            resp = urllib.request.urlopen(req)
+        except urllib.error.URLError as e:
             self.log.error("Can't open url %s. %s", eventstore_host, e)
         else:
             content = resp.read()

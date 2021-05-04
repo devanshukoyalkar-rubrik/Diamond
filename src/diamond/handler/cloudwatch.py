@@ -41,7 +41,7 @@ unit = None
 import sys
 import datetime
 
-from Handler import Handler
+from .Handler import Handler
 from configobj import Section
 
 try:
@@ -90,9 +90,9 @@ class cloudwatchHandler(Handler):
                              'collect_without_dimension')
 
         self.rules = []
-        for key_name, section in self.config.items():
+        for key_name, section in list(self.config.items()):
             if section.__class__ is Section:
-                keys = section.keys()
+                keys = list(section.keys())
                 rules = self.get_default_rule_config()
                 for key in keys:
                     if key not in self.valid_config:
@@ -254,10 +254,10 @@ class cloudwatchHandler(Handler):
                 rule['namespace'],
                 str(metric.value),
                 str(dimensions))
-        except AttributeError, e:
+        except AttributeError as e:
             self.log.error(
                 "CloudWatch: Failed publishing - %s ", str(e))
-        except Exception, e:  # Rough connection re-try logic.
+        except Exception as e:  # Rough connection re-try logic.
             self.log.error(
                 "CloudWatch: Failed publishing - %s\n%s ",
                 str(e),

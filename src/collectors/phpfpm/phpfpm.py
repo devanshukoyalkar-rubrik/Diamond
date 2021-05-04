@@ -36,7 +36,7 @@ try:
 except ImportError:
     import simplejson as json
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import diamond.collector
 
 
@@ -72,16 +72,16 @@ class PhpFpmCollector(diamond.collector.Collector):
             self.config['uri'] = self.config['uri'][1:]
 
         try:
-            response = urllib2.urlopen("http://%s:%s/%s?json" % (
+            response = urllib.request.urlopen("http://%s:%s/%s?json" % (
                 self.config['host'], int(self.config['port']),
                 self.config['uri']))
-        except Exception, e:
+        except Exception as e:
             self.log.error('Couldnt connect to php-fpm status page: %s', e)
             return {}
 
         try:
             j = json.loads(response.read())
-        except Exception, e:
+        except Exception as e:
             self.log.error('Couldnt parse json: %s', e)
             return {}
 
@@ -97,7 +97,7 @@ class PhpFpmCollector(diamond.collector.Collector):
             'max_children_reached',
             'slow_requests'
         ]
-        for k, v in j.items():
+        for k, v in list(j.items()):
             #
             # php-fpm has spaces in the keys so lets replace all spaces with _
             k = k.replace(" ", "_")

@@ -146,9 +146,9 @@ class CPUCollector(diamond.collector.Collector):
             metrics = {}
             metrics['cpu_count'] = ncpus
 
-            for cpu in results.keys():
+            for cpu in list(results.keys()):
                 stats = results[cpu]
-                for s in stats.keys():
+                for s in list(stats.keys()):
                     # Get Metric Name
                     metric_name = '.'.join([cpu, s])
                     # Get actual data
@@ -157,12 +157,12 @@ class CPUCollector(diamond.collector.Collector):
                          ncpus > 0)):
                         metrics[metric_name] = self.derivative(
                             metric_name,
-                            long(stats[s]),
+                            int(stats[s]),
                             self.MAX_VALUES[s]) / ncpus
                     else:
                         metrics[metric_name] = self.derivative(
                             metric_name,
-                            long(stats[s]),
+                            int(stats[s]),
                             self.MAX_VALUES[s])
 
             # Check for a bug in xen where the idle time is doubled for guest
@@ -170,12 +170,12 @@ class CPUCollector(diamond.collector.Collector):
             if self.config['xenfix'] is None or self.config['xenfix'] is True:
                 if os.path.isdir('/proc/xen'):
                     total = 0
-                    for metric_name in metrics.keys():
+                    for metric_name in list(metrics.keys()):
                         if 'cpu0.' in metric_name:
                             total += int(metrics[metric_name])
                     if total > 110:
                         self.config['xenfix'] = True
-                        for mname in metrics.keys():
+                        for mname in list(metrics.keys()):
                             if '.idle' in mname:
                                 metrics[mname] = float(metrics[mname]) / 2
                     elif total > 0:
@@ -184,7 +184,7 @@ class CPUCollector(diamond.collector.Collector):
                     self.config['xenfix'] = False
 
             # Publish Metric Derivative
-            for metric_name in metrics.keys():
+            for metric_name in list(metrics.keys()):
                 self.publish(metric_name,
                              metrics[metric_name],
                              precision=2)

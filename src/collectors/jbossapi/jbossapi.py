@@ -357,13 +357,13 @@ class JbossApiCollector(diamond.collector.Collector):
                                           stdout=subprocess.PIPE
                                           ).communicate()[0]
             output = json.loads(attributes)
-        except Exception, e:
+        except Exception as e:
             self.log.error("JbossApiCollector: There was an exception %s", e)
             output = ''
         return output
 
     def is_number(self, value):
-        return (isinstance(value, (int, long, float)) and
+        return (isinstance(value, (int, float)) and
                 not isinstance(value, bool))
 
     def string_fix(self, s):

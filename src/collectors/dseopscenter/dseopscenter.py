@@ -4,7 +4,7 @@
 Collect the DataStax OpsCenter metrics
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import datetime
 
 try:
@@ -119,8 +119,8 @@ class DseOpsCenterCollector(diamond.collector.Collector):
                                              int(self.config['port']),
                                              self.config['cluster_id'])
         try:
-            response = urllib2.urlopen(url)
-        except Exception, err:
+            response = urllib.request.urlopen(url)
+        except Exception as err:
             self.log.error('%s: %s', url, err)
             return False
 
@@ -157,8 +157,8 @@ class DseOpsCenterCollector(diamond.collector.Collector):
             self.config['default_tail_opts'])
 
         try:
-            response = urllib2.urlopen(url)
-        except Exception, err:
+            response = urllib.request.urlopen(url)
+        except Exception as err:
             self.log.error('%s: %s', url, err)
             return False
 

@@ -111,7 +111,7 @@ class RedisCollector(diamond.collector.Collector):
         super(RedisCollector, self).process_config()
         instance_list = self.config['instances']
         # configobj make str of single-element list, let's convert
-        if isinstance(instance_list, basestring):
+        if isinstance(instance_list, str):
             instance_list = [instance_list]
 
         # process original single redis instance
@@ -170,7 +170,7 @@ class RedisCollector(diamond.collector.Collector):
 
                 self.instances[nickname] = (host, port, None, auth)
 
-        self.log.debug("Configured instances: %s" % self.instances.items())
+        self.log.debug("Configured instances: %s" % list(self.instances.items()))
 
     def get_default_config_help(self):
         config_help = super(RedisCollector, self).get_default_config_help()
@@ -222,7 +222,7 @@ class RedisCollector(diamond.collector.Collector):
                               unix_socket_path=unix_socket)
             cli.ping()
             return cli
-        except Exception, ex:
+        except Exception as ex:
             self.log.error("RedisCollector: failed to connect to %s:%i. %s.",
                            unix_socket or host, port, ex)
 
@@ -321,7 +321,7 @@ class RedisCollector(diamond.collector.Collector):
         # Then calculate the % maxmemory of memory used
         maxmemory_config = self._get_config(host, port, unix_socket, auth,
                                             'maxmemory')
-        if maxmemory_config and 'maxmemory' in maxmemory_config.keys():
+        if maxmemory_config and 'maxmemory' in list(maxmemory_config.keys()):
             maxmemory = float(maxmemory_config['maxmemory'])
 
             # Only report % used if maxmemory is a non zero value
@@ -370,6 +370,6 @@ class RedisCollector(diamond.collector.Collector):
             self.log.error('Unable to import module redis')
             return {}
 
-        for nick in self.instances.keys():
+        for nick in list(self.instances.keys()):
             (host, port, unix_socket, auth) = self.instances[nick]
             self.collect_instance(nick, host, int(port), unix_socket, auth)

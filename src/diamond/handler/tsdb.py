@@ -77,10 +77,10 @@ high.
 
 """
 
-from Handler import Handler
+from .Handler import Handler
 from diamond.metric import Metric
-import urllib2
-import StringIO
+import urllib.request, urllib.error, urllib.parse
+import io
 import gzip
 import base64
 import json
@@ -215,7 +215,7 @@ class TSDBHandler(Handler):
         if (len(self.entrys) >= self.batch):
             # Compress data
             if self.compression >= 1:
-                data = StringIO.StringIO()
+                data = io.StringIO()
                 with contextlib.closing(gzip.GzipFile(fileobj=data,
                                         compresslevel=self.compression,
                                         mode="w")) as f:
@@ -235,19 +235,19 @@ class TSDBHandler(Handler):
         while retry < 3 and success is False:
             self.log.debug(content)
             try:
-                request = urllib2.Request("http://"+self.host+":" +
+                request = urllib.request.Request("http://"+self.host+":" +
                                           str(self.port)+"/api/put",
                                           content, self.httpheader)
-                response = urllib2.urlopen(url=request, timeout=self.timeout)
+                response = urllib.request.urlopen(url=request, timeout=self.timeout)
                 if response.getcode() < 301:
                     self.log.debug(response.read())
                     # Transaction should be finished
                     self.log.debug(response.getcode())
                     success = True
-            except urllib2.HTTPError, e:
+            except urllib.error.HTTPError as e:
                 self.log.error("HTTP Error Code: "+str(e.code))
                 self.log.error("Message : "+str(e.reason))
-            except urllib2.URLError, e:
+            except urllib.error.URLError as e:
                 self.log.error("Connection Error: "+str(e.reason))
             finally:
                 retry += 1

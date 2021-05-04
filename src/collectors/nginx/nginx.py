@@ -56,7 +56,7 @@ For commercial nginx+:
 
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import re
 import diamond.collector
 import json
@@ -217,9 +217,9 @@ class NginxCollector(diamond.collector.Collector):
                                 int(self.config['req_port']),
                                 self.config['req_path'])
 
-        req = urllib2.Request(url=url, headers=headers)
+        req = urllib.request.Request(url=url, headers=headers)
         try:
-            handle = urllib2.urlopen(req)
+            handle = urllib.request.urlopen(req)
 
             # Test for json payload; indicates nginx+
             if handle.info().gettype() == 'application/json':
@@ -229,7 +229,7 @@ class NginxCollector(diamond.collector.Collector):
             else:
                 self.collect_nginx(handle)
 
-        except IOError, e:
+        except IOError as e:
             self.log.error("Unable to open %s" % url)
-        except Exception, e:
+        except Exception as e:
             self.log.error("Unknown error opening url: %s", e)

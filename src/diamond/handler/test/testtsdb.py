@@ -5,9 +5,9 @@
 from test import unittest
 from mock import patch, Mock
 from diamond.metric import Metric
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import configobj
-import StringIO
+import io
 import gzip
 import contextlib
 
@@ -22,7 +22,7 @@ class TestTSDBdHandler(unittest.TestCase):
         self.url = 'http://127.0.0.1:4242/api/put'
 
     def decompress(self, input):
-        infile = StringIO.StringIO()
+        infile = io.StringIO()
         infile.write(input)
         with contextlib.closing(gzip.GzipFile(fileobj=infile, mode="r")) as f:
             f.rewind()
@@ -38,7 +38,7 @@ class TestTSDBdHandler(unittest.TestCase):
                         host='myhostname', metric_type='GAUGE')
         handler = TSDBHandler(config)
         header = {'Content-Type': 'application/json'}
-        exception = urllib2.HTTPError(url=self.url, code=404, msg="Error",
+        exception = urllib.error.HTTPError(url=self.url, code=404, msg="Error",
                                       hdrs=header, fp=None)
         handler.side_effect = exception
         handler.process(metric)

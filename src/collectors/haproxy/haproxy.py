@@ -11,7 +11,7 @@ Collect HAProxy Stats
 """
 
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import base64
 import csv
 import socket
@@ -64,11 +64,11 @@ class HAProxyCollector(diamond.collector.Collector):
         Request stats from HAProxy Server
         """
         metrics = []
-        req = urllib2.Request(self._get_config_value(section, 'url'))
+        req = urllib.request.Request(self._get_config_value(section, 'url'))
         try:
-            handle = urllib2.urlopen(req)
+            handle = urllib.request.urlopen(req)
             return handle.readlines()
-        except Exception, e:
+        except Exception as e:
             if not hasattr(e, 'code') or e.code != 401:
                 self.log.error("Error retrieving HAProxy stats. %s", e)
                 return metrics
@@ -101,10 +101,10 @@ class HAProxyCollector(diamond.collector.Collector):
         authheader = 'Basic %s' % base64string
         req.add_header("Authorization", authheader)
         try:
-            handle = urllib2.urlopen(req)
+            handle = urllib.request.urlopen(req)
             metrics = handle.readlines()
             return metrics
-        except IOError, e:
+        except IOError as e:
             # here we shouldn't fail if the USER/PASS is right
             self.log.error("Error retrieving HAProxy stats. " +
                            "(Invalid username or password?) %s", e)
@@ -122,7 +122,7 @@ class HAProxyCollector(diamond.collector.Collector):
                 if not buf:
                     break
                 data += buf
-        except socket.error, e:
+        except socket.error as e:
             self.log.error("Error retrieving HAProxy stats. %s", e)
             return []
 

@@ -27,6 +27,7 @@ import datetime
 from diamond.collector import str_to_bool
 import re
 import zlib
+from functools import reduce
 
 try:
     import pymongo
@@ -115,7 +116,7 @@ class MongoDBCollector(diamond.collector.Collector):
         hosts = self.config.get('hosts')
 
         # Convert a string config value to be an array
-        if isinstance(hosts, basestring):
+        if isinstance(hosts, str):
             hosts = [hosts]
 
         # we need this for backwards compatibility
@@ -175,7 +176,7 @@ class MongoDBCollector(diamond.collector.Collector):
                         ssl=self.config['ssl'],
                         read_preference=ReadPreference.SECONDARY,
                     )
-            except Exception, e:
+            except Exception as e:
                 self.log.error('Couldnt connect to mongodb: %s', e)
                 continue
 
@@ -183,7 +184,7 @@ class MongoDBCollector(diamond.collector.Collector):
             if user:
                 try:
                     conn.admin.authenticate(user, passwd)
-                except Exception, e:
+                except Exception as e:
                     self.log.error(
                         'User auth given, but could not autheticate' +
                         ' with host: %s, err: %s' % (host, e))
@@ -348,10 +349,10 @@ class MongoDBCollector(diamond.collector.Collector):
                 self._publish_metrics(keys, new_key, value)
         elif isinstance(value, int) or isinstance(value, float):
             publishfn('.'.join(keys), value)
-        elif isinstance(value, long):
+        elif isinstance(value, int):
             publishfn('.'.join(keys), float(value))
         elif isinstance(value, datetime.datetime):
-            publishfn('.'.join(keys), long(value.strftime('%s')))
+            publishfn('.'.join(keys), int(value.strftime('%s')))
 
     def _extract_simple_data(self, data):
         return {
