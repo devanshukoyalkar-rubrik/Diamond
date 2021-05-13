@@ -1,4 +1,5 @@
 # coding=utf-8
+# Ignore lint errors as code is from github.com/python-diamond/Diamond
 
 import time
 import math

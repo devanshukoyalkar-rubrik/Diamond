@@ -1,21 +1,23 @@
 # coding=utf-8
+# Ignore lint errors as code is from github.com/python-diamond/Diamond
 
 """
 The Collector class is a base class for all metric collectors.
 """
 
+import logging
 import os
-import socket
 import platform
-from . import logging
-import configobj
-import time
 import re
+import socket
 import subprocess
+import time
+import traceback
 
+import configobj
 from diamond.metric import Metric
 from diamond.utils.config import load_config
-from .error import DiamondException
+from error import DiamondException
 
 # Detect the architecture of the system and set the counters for MAX_VALUES
 # appropriately. Otherwise, rolling over counters will cause incorrect or
@@ -25,6 +27,16 @@ if platform.architecture()[0] == '64bit':
     MAX_COUNTER = (2 ** 64) - 1
 else:
     MAX_COUNTER = (2 ** 32) - 1
+
+DEFAULT_RUN_COUNT_DIR = "/etc/service/diamond/plugin_metrics"
+
+
+def raw_hostname():
+    if os.path.exists('/var/lib/rubrik/nodeId'):
+        with open('/var/lib/rubrik/nodeId') as f:
+            return f.read().strip()
+    else:
+        return socket.gethostname()
 
 
 def get_hostname(config, method=None):
@@ -49,7 +61,6 @@ def get_hostname(config, method=None):
                 " hostname_method=shell")
         else:
             proc = subprocess.Popen(config['hostname'],
-                                    shell=True,
                                     stdout=subprocess.PIPE)
             hostname = proc.communicate()[0].strip()
             if proc.returncode != 0:
@@ -107,21 +118,21 @@ def get_hostname(config, method=None):
         return hostname
 
     if method == 'hostname':
-        hostname = socket.gethostname()
+        hostname = raw_hostname()
         get_hostname.cached_results[method] = hostname
         if hostname == '':
             raise DiamondException('Hostname is empty?!')
         return hostname
 
     if method == 'hostname_short':
-        hostname = socket.gethostname().split('.')[0]
+        hostname = raw_hostname().split('.')[0]
         get_hostname.cached_results[method] = hostname
         if hostname == '':
             raise DiamondException('Hostname is empty?!')
         return hostname
 
     if method == 'hostname_rev':
-        hostname = socket.gethostname().split('.')
+        hostname = raw_hostname().split('.')
         hostname.reverse()
         hostname = '.'.join(hostname)
         get_hostname.cached_results[method] = hostname
@@ -177,6 +188,50 @@ class Collector(object):
 
         self.configfile = None
         self.load_config(configfile, config)
+
+        # Generate a metric-friendly collector name without spaces
+        collector_name = self.name.replace(' ', '_')
+        metric_name = '%s.Run.count' % collector_name
+
+        # Store run count in a file
+        run_count = self.read_run_counter(collector_name)
+        run_count += 1
+        self.write_run_counter(collector_name, run_count)
+
+    def read_run_counter(self, collector_name):
+        filename = os.path.join(DEFAULT_RUN_COUNT_DIR, "%s_run_count" %
+                                collector_name)
+        count = 0
+        try:
+            with open(filename, 'r') as f:
+                count = int(f.read().strip())
+        except:
+            # Be extremely generous when it comes to handling file open or read
+            # errors. Delete and create new file
+            self.log.error('Error when reading run count file for %s: %s' %
+                           (self.name.replace(' ', '_'),
+                            traceback.format_exc()))
+            self.reset_run_counter(collector_name)
+        return count
+
+    def write_run_counter(self, collector_name, run_count):
+        filename = os.path.join(DEFAULT_RUN_COUNT_DIR, "%s_run_count" %
+                                collector_name)
+        with open(filename, 'w') as f:
+            f.write("%d" % run_count)
+
+    def reset_run_counter(self, collector_name):
+        if not os.path.exists(DEFAULT_RUN_COUNT_DIR):
+            os.makedirs(DEFAULT_RUN_COUNT_DIR)
+
+        # Reset run counter by deleting the old file & creating a new one.
+        filename = os.path.join(DEFAULT_RUN_COUNT_DIR, "%s_run_count" %
+                                collector_name)
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        with open(filename, 'w') as f:
+            f.write("0")
 
     def load_config(self, configfile=None, override_config=None):
         """
@@ -287,6 +342,9 @@ class Collector(object):
 
             # Path Suffix
             'path_suffix': '',
+
+            # Default run count file directory
+            'run_count_dir': DEFAULT_RUN_COUNT_DIR,
 
             # Default Poll Interval (seconds)
             'interval': 300,
@@ -536,8 +594,8 @@ class ProcessCollector(Collector):
     def get_default_config_help(self):
         config_help = super(ProcessCollector, self).get_default_config_help()
         config_help.update({
-            'use_sudo':     'Use sudo?',
-            'sudo_cmd':     'Path to sudo',
+            'use_sudo': 'Use sudo?',
+            'sudo_cmd': 'Path to sudo',
         })
         return config_help
 
@@ -547,8 +605,8 @@ class ProcessCollector(Collector):
         """
         config = super(ProcessCollector, self).get_default_config()
         config.update({
-            'use_sudo':     False,
-            'sudo_cmd':     self.find_binary('/usr/bin/sudo'),
+            'use_sudo': False,
+            'sudo_cmd': self.find_binary('/usr/bin/sudo'),
         })
         return config
 

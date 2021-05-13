@@ -1,6 +1,7 @@
 # coding=utf-8
+# Ignore lint errors as code is from github.com/python-diamond/Diamond
 
-from . import logging
+import logging
 import multiprocessing
 import os
 import signal
@@ -8,7 +9,8 @@ import sys
 import time
 
 try:
-    from setproctitle import getproctitle, setproctitle
+    from setproctitle import getproctitle
+    from setproctitle import setproctitle
 except ImportError:
     setproctitle = None
 
@@ -18,22 +20,18 @@ sys.path.append(
         os.path.join(
             os.path.dirname(__file__), "../")))
 
+from diamond.handler.Handler import Handler
 from diamond.utils.classes import initialize_collector
 from diamond.utils.classes import load_collectors
 from diamond.utils.classes import load_dynamic_class
 from diamond.utils.classes import load_handlers
 from diamond.utils.classes import load_include_path
-
 from diamond.utils.config import load_config
 from diamond.utils.config import str_to_bool
-
 from diamond.utils.scheduler import collector_process
 from diamond.utils.scheduler import handler_process
-
-from diamond.handler.Handler import Handler
-
-from diamond.utils.signals import signal_to_exception
 from diamond.utils.signals import SIGHUPException
+from diamond.utils.signals import signal_to_exception
 
 
 class Server(object):
