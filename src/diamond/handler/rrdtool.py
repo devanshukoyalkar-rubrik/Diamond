@@ -7,7 +7,10 @@ Save stats in RRD files using rrdtool.
 import os
 import re
 import subprocess
-from . import Queue
+# Queue in python2 is queue in python3
+# We want to avoid resemblence to queue which is an
+# instance variable of many classes
+import queue as Queue
 
 from .Handler import Handler
 

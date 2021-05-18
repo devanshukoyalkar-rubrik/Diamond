@@ -6,7 +6,10 @@ do not try to use it as a normal handler
 """
 
 from .Handler import Handler
-from . import Queue
+# Queue in python2 is queue in python3
+# We want to avoid resemblence to queue which is an
+# instance variable of many classes
+import queue as Queue
 
 
 class QueueHandler(Handler):
