@@ -128,7 +128,8 @@ class GraphiteHandler(Handler):
         Try to send all data in buffer.
         """
         try:
-            self.socket.sendall(data)
+            # Encode data to binary before sending it via socket
+            self.socket.sendall(data.encode("ascii"))
             self._reset_errors()
         except:
             self._close()

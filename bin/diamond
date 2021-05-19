@@ -48,6 +48,11 @@ def main():
                           default="/etc/diamond/diamond.conf",
                           help="config file")
 
+        parser.add_option("-k", "--logging_configfile",
+                          dest="logging_configfile",
+                          default="/etc/diamond/diamond_logging.conf",
+                          help="logging config file")
+
         parser.add_option("-f", "--foreground",
                           dest="foreground",
                           default=False,
@@ -124,7 +129,7 @@ def main():
             sys.exit(1)
 
         # Initialize Logging
-        log = setup_logging(options.configfile, options.log_stdout)
+        log = setup_logging(options.logging_configfile, options.log_stdout)
 
     # Pass the exit up stream rather then handle it as an general exception
     except SystemExit as e:
