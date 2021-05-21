@@ -85,7 +85,9 @@ class IPMISensorCollector(diamond.collector.Collector):
         if use_sudo and getpass.getuser() != 'root':
             command.insert(0, self.config['sudo_cmd'])
 
-        p = Popen(command, stdout=PIPE).communicate()[0][:-1]
+        # Convert binary output to string utf-8 format
+        p = Popen(command, stdout=PIPE).communicate()[0][:-1].decode("utf-8")
+
 
         for i, v in enumerate(p.split("\n")):
             data = v.split("|")

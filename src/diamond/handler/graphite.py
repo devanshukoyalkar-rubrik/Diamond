@@ -129,7 +129,7 @@ class GraphiteHandler(Handler):
         """
         try:
             # Encode data to binary before sending it via socket
-            self.socket.sendall(data.encode("ascii"))
+            self.socket.sendall(data.encode("utf-8"))
             self._reset_errors()
         except:
             self._close()

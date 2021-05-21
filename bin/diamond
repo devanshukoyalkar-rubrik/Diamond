@@ -244,7 +244,7 @@ def main():
                 except OSError as e:
                     print("Failed to fork process." % (e), file=sys.stderr)
                     sys.exit(1)
-                # Decouple from parent environmen
+                # Decouple from parent environment
                 os.setsid()
                 os.umask(0o022)
                 # Fork 2
@@ -283,7 +283,7 @@ def main():
                 log.debug("Wrote child PID file: %s" % (options.pidfile))
 
         # Initialize Server
-        server = Server(configfile=options.configfile)
+        server = Server(configfile=options.configfile, run_collector_once_and_exit=options.collector)
 
         def shutdown_handler(signum, frame):
             log.info("Signal Received: %d" % (signum))

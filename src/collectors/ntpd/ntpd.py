@@ -45,9 +45,9 @@ class NtpdCollector(diamond.collector.Collector):
         try:
             if str_to_bool(self.config['use_sudo']):
                 command.insert(0, self.config['sudo_cmd'])
-
+            # Convert binary output to utf-8
             return subprocess.Popen(command,
-                                    stdout=subprocess.PIPE).communicate()[0]
+                                    stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
         except OSError:
             self.log.exception("Unable to run %s", command)
             return ""
@@ -56,6 +56,7 @@ class NtpdCollector(diamond.collector.Collector):
         return self.run_command([self.config['ntpq_bin'], '-np'])
 
     def get_ntpq_stats(self):
+
         output = self.get_ntpq_output()
 
         data = {}

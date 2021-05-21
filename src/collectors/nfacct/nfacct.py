@@ -62,8 +62,9 @@ class NetfilterAccountingCollector(diamond.collector.Collector):
 
         # Each line is of the format:
         # { pkts = 00000000000001121700, bytes = 00000000000587037355 } = ipv4;
+        # We have to convert binary output to utf-8 format
         matcher = re.compile("{ pkts = (.*), bytes = (.*) } = (.*);")
-        lines = Popen(cmd, stdout=PIPE).communicate()[0].strip().splitlines()
+        lines = Popen(cmd, stdout=PIPE).communicate()[0].decode("utf-8").strip().splitlines()
 
         for line in lines:
             matches = re.match(matcher, line)

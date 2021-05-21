@@ -84,6 +84,8 @@ class UserScriptsCollector(diamond.collector.Collector):
             if err:
                 self.log.error("%s returned error output (stderr): %s" %
                                (absolutescriptpath, err))
+            # Decode out which is in binary
+            out = out.decode("utf-8")
             # Use filter to remove empty lines of output
             for line in [_f for _f in out.split('\n') if _f]:
                 # Ignore invalid lines
