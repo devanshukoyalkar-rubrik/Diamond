@@ -283,7 +283,7 @@ def main():
                 log.debug("Wrote child PID file: %s" % (options.pidfile))
 
         # Initialize Server
-        server = Server(configfile=options.configfile, run_collector_once_and_exit=options.collector)
+        server = Server(configfile=options.configfile)
 
         def shutdown_handler(signum, frame):
             log.info("Signal Received: %d" % (signum))

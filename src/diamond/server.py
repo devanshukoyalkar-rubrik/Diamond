@@ -39,12 +39,11 @@ class Server(object):
     Server class loads and starts Handlers and Collectors
     """
 
-    def __init__(self, configfile, run_collector_once_and_exit):
+    def __init__(self, configfile):
         # Initialize Logging
         self.log = logging.getLogger('diamond')
         # Initialize Members
         self.configfile = configfile
-        self.run_collector_once_and_exit = run_collector_once_and_exit
         self.config = None
         self.handlers = []
         self.handler_queue = []
@@ -146,13 +145,10 @@ class Server(object):
                 ##############################################################
 
                 running_collectors = []
-                if not self.run_collector_once_and_exit:
-                    for collector, config in self.config['collectors'].items():
-                        if config.get('enabled', False) is not True:
-                            continue
-                        running_collectors.append(collector)
-                else:
-                    running_collectors.append(self.run_collector_once_and_exit)
+                for collector, config in self.config['collectors'].items():
+                    if config.get('enabled', False) is not True:
+                        continue
+                    running_collectors.append(collector)
                 running_collectors = set(running_collectors)
 
                 # Collectors that are running but shouldn't be
